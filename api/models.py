@@ -16,6 +16,10 @@ class Questions(models.Model):
     created_date=models.DateField(auto_now_add=True)
     user=models.ForeignKey(User,on_delete=models.CASCADE)
 
+    @property
+    def question_answers(self):
+        return self.answers_set.all()
+
     def __str__(self):
         return self.title
 

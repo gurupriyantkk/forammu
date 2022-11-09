@@ -15,7 +15,7 @@ class UserView(ModelViewSet):
 
 class QuestionView(ModelViewSet):
     serializer_class=QuestionSerializer
-    queryset=User.objects.all()
+    queryset=Questions.objects.all()
     authentication_classes=[authentication.BasicAuthentication]
     permission_classes=[permissions.IsAuthenticated]
 
@@ -27,14 +27,22 @@ class QuestionView(ModelViewSet):
         qs=request.user.questions_set.all()
         serializer=QuestionSerializer(qs,many=True)
         return Response(data=serializer.data)
-
+    @action(methods=["post"],detail=True)
     def add_answer(self,request,*args,**kw):
         id=kw.get("pk")
         ques=Questions.objects.get(id=id)
         user=request.user
-        serializer=AnswerSerializer(data=serializer.data)
+        serializer=AnswerSerializer(data=request.data,context={"question":ques,"user":user})
         if serializer.is_valid():
             serializer.save()
             return Response(data=serializer.data)
         else:
             return Response(data=serializer.errors)
+
+    @action(methods=["GET"],detail=True)
+    def list_answers(self,request,*args,**kw):
+            id=kw.get("pk")
+            ques=Questions.objects.get(id=id)
+            qs=ques.answers_set.all()
+            serializer=AnswerSerializer(qs,many=True)
+            return Response(data=serializer.data)
