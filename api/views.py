@@ -3,7 +3,7 @@ from api.serializers import UserSerializer,QuestionSerializer,AnswerSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from api.models import Questions
+from api.models import Questions,Answers
 from rest_framework import authentication,permissions
 from rest_framework.decorators import action
 
@@ -46,3 +46,21 @@ class QuestionView(ModelViewSet):
             qs=ques.answers_set.all()
             serializer=AnswerSerializer(qs,many=True)
             return Response(data=serializer.data)
+
+
+class AnswerView(ModelViewSet):
+    serializer_class=AnswerSerializer
+    queryset=Answers.objects.all()
+    authentication_classes=[authentication.BasicAuthentication]
+    permission_classes=[permissions.IsAuthenticated]
+    
+    @action(methods=["get"],detail=True)
+    def upvote(self,request,*args,**kw):
+        ans=self.get_object()
+        usr=request.user
+        ans.upvote.add(usr)
+        return Response(data="created")
+
+
+
+

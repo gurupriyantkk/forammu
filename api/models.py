@@ -6,6 +6,7 @@ from turtle import title
 from unittest.util import _MAX_LENGTH
 from django.db import models 
 from django.contrib.auth.models import User
+from django.db.models import Count
 
 # Create your models here.
 
@@ -18,7 +19,8 @@ class Questions(models.Model):
 
     @property
     def question_answers(self):
-        return self.answers_set.all()
+        qs=self.answers_set.all().annotate(u_count=Count('upvote')).order_by('-u_count')
+        return qs
 
     def __str__(self):
         return self.title
@@ -32,3 +34,7 @@ class Answers(models.Model):
 
     def __str__(self):
         return self.answer
+
+    @property
+    def votecount(self):
+        return self.upvote.all().count()
